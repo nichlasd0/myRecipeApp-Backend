@@ -10,7 +10,7 @@ namespace recipeapp_backend.Models
         public string ImagePath { get; set; }
         public string Name { get; set; }
         public ICollection<Order> Orders { get; set; }
-        public ICollection<Ingredients> Ingredientses { get; set; } 
+        public ICollection<Ingredients> Ingredients { get; set; } 
 
     }
 }

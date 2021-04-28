@@ -10,6 +10,6 @@ namespace recipeapp_backend.Models.DTO
         public string Name { get; set; }
         
         public List<OrderDto> Orders { get; set; }
-        public List<IngredientsDto> Ingredientses { get; set; } 
+        public List<IngredientsDto> Ingredients { get; set; } 
     }
 }    

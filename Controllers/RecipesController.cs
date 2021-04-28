@@ -18,7 +18,6 @@ namespace recipeapp_backend.Controllers
         public RecipesController(ApplicationDbContext context)
         {
             _applicationDbContext = context;
-            
         }
 
 
@@ -26,7 +25,7 @@ namespace recipeapp_backend.Controllers
         public IEnumerable<RecipesDto> GetRecipes()
         {
             var recipesFromDb = _applicationDbContext.Recipes
-                .Include(i => i.Ingredientses)
+                .Include(i => i.Ingredients)
                 .Include(o => o.Orders).ToList();
             
             
@@ -39,6 +38,26 @@ namespace recipeapp_backend.Controllers
             var mapper = new Mapper(config);
             List<RecipesDto> dto = mapper.Map<List<Recipes>, List<RecipesDto>>(recipesFromDb);
             return dto;
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<RecipesDto> GetRecipeById(int id)
+        {
+            var singleRecipe = _applicationDbContext.Recipes
+                .Include(i => i.Ingredients)
+                .Include(o => o.Orders);
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Recipes, RecipesDto>();
+                cfg.CreateMap<Ingredients, IngredientsDto>();
+                cfg.CreateMap<Order, OrderDto>();
+            });
+            
+            var mapper = new Mapper(config);
+
+            var foundRecipe = mapper.Map<List<Recipes>, List<RecipesDto>>(new List<Recipes>(singleRecipe))
+                .FirstOrDefault(x => x.Id == id);
+            return foundRecipe;
         }
 
 
@@ -64,7 +83,7 @@ namespace recipeapp_backend.Controllers
                 ImagePath =
                     "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_147878/cf_259/picklad_rodlok.jpg",
                 Orders = new List < Order >{order1},
-                Ingredientses = new List<Ingredients>{ingredient1}
+                Ingredients = new List<Ingredients>{ingredient1}
 
             };
 
