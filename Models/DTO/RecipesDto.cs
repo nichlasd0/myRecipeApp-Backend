@@ -9,7 +9,7 @@ namespace recipeapp_backend.Models.DTO
         public string ImagePath { get; set; }
         public string Name { get; set; }
         
-        public List<OrderDto> Orders { get; set; }
-        public List<IngredientsDto> Ingredients { get; set; } 
+        public List<InstructionDto> Instructions { get; set; }
+        public List<IngredientDto> Ingredients { get; set; } 
     }
 }    

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using recipeapp_backend.Data;
+using recipeapp_backend.Profile;
 
 namespace recipeapp_backend
 {
@@ -30,6 +31,7 @@ namespace recipeapp_backend
         {
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
                 Configuration.GetConnectionString("DefaultConnection")));
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

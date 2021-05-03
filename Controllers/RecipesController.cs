@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,88 +15,80 @@ namespace recipeapp_backend.Controllers
     public class RecipesController : Controller
     {
         private readonly ApplicationDbContext _applicationDbContext;
-
-        public RecipesController(ApplicationDbContext context)
+        private readonly IMapper _mapper;
+        public RecipesController(ApplicationDbContext context, IMapper mapper)
         {
             _applicationDbContext = context;
+            _mapper = mapper;
         }
-
-
+        
         [HttpGet]
         public IEnumerable<RecipesDto> GetRecipes()
         {
             var recipesFromDb = _applicationDbContext.Recipes
                 .Include(i => i.Ingredients)
-                .Include(o => o.Orders).ToList();
+                .Include(o => o.Instructions).ToList();
             
-            
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Recipes, RecipesDto>();
-                cfg.CreateMap<Ingredients, IngredientsDto>();
-                cfg.CreateMap<Order, OrderDto>();
-            });
-            var mapper = new Mapper(config);
-            List<RecipesDto> dto = mapper.Map<List<Recipes>, List<RecipesDto>>(recipesFromDb);
-            return dto;
+            return _mapper.Map<List<RecipesDto>>(recipesFromDb);
         }
 
         [HttpGet("{id}")]
         public ActionResult<RecipesDto> GetRecipeById(int id)
         {
+            
             var singleRecipe = _applicationDbContext.Recipes
                 .Include(i => i.Ingredients)
-                .Include(o => o.Orders);
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Recipes, RecipesDto>();
-                cfg.CreateMap<Ingredients, IngredientsDto>();
-                cfg.CreateMap<Order, OrderDto>();
-            });
-            
-            var mapper = new Mapper(config);
+                .Include(o => o.Instructions).FirstOrDefault(x => x.Id == id);
 
-            var foundRecipe = mapper.Map<List<Recipes>, List<RecipesDto>>(new List<Recipes>(singleRecipe))
-                .FirstOrDefault(x => x.Id == id);
-            return foundRecipe;
+            if (singleRecipe is null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<RecipesDto>(singleRecipe);
         }
 
+
+        // [HttpPost]
+        // public IActionResult SeedDatabase()
+        // {
+        //     var order1 = new Instruction
+        //     {
+        //         InstructionStep = "test"
+        //     };
+        //     var ingredient1 = new Ingredient
+        //     {
+        //         Name = "Normalstora Lökar",
+        //         Amount = "2",
+        //         Unit = "hela",
+        //     };
+        //
+        //     var recipe1 = new Recipes
+        //     {
+        //         Name = "Picklad rödlök",
+        //         Description =
+        //             "Sugen på något nytt till dina tacos eller hamburgare? Då är picklad rödlök perfekt. Det enda du behöver är ättika, rödlök och socker. Skiva löken i tunna ringar som du sen lägger i lagen och låter stå över natten. Det är riktigt vackert och smakligt. För lite extra sting kan du addera en gnutta chili i lagen.",
+        //         ImagePath =
+        //             "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_147878/cf_259/picklad_rodlok.jpg",
+        //         Instructions = new List < Instruction >{order1},
+        //         Ingredients = new List<Ingredient>{ingredient1}
+        //
+        //     };
+        //
+        //     _applicationDbContext.Recipes.Add(recipe1);
+        //     _applicationDbContext.SaveChanges();
+        //
+        //     return Ok();
+        // }
+        
 
         [HttpPost]
-        public IActionResult SeedDatabase()
+        public async Task<ActionResult<RecipesDto>> CreateRecipes(Recipes recipes)
         {
-            var order1 = new Order
-            {
-                OrderStep = "test"
-            };
-            var ingredient1 = new Ingredients
-            {
-                Name = "Normalstora Lökar",
-                Amount = "2",
-                Unit = "hela",
-            };
-
-            var recipe1 = new Recipes
-            {
-                Name = "Picklad rödlök",
-                Description =
-                    "Sugen på något nytt till dina tacos eller hamburgare? Då är picklad rödlök perfekt. Det enda du behöver är ättika, rödlök och socker. Skiva löken i tunna ringar som du sen lägger i lagen och låter stå över natten. Det är riktigt vackert och smakligt. För lite extra sting kan du addera en gnutta chili i lagen.",
-                ImagePath =
-                    "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_147878/cf_259/picklad_rodlok.jpg",
-                Orders = new List < Order >{order1},
-                Ingredients = new List<Ingredients>{ingredient1}
-
-            };
-
-            _applicationDbContext.Recipes.Add(recipe1);
-            _applicationDbContext.SaveChanges();
-
-            return Ok();
+            await _applicationDbContext.Recipes.AddAsync(recipes);
+            await _applicationDbContext.SaveChangesAsync();
+            
+            return _mapper.Map<RecipesDto>(recipes);
         }
-        // [HttpPut]
-        // public IEnumerable<RecipesDto> SetRecipes()
-        // {
-        //     
-        // }
     }
 }
