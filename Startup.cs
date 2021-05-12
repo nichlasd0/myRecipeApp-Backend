@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper.EquivalencyExpression;
 using Microsoft.EntityFrameworkCore;
 using recipeapp_backend.Data;
 using recipeapp_backend.Profile;
@@ -32,10 +33,15 @@ namespace recipeapp_backend
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
                 Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+            // services.AddAutoMapper(cfg =>
+            // {
+            //     cfg.AddCollectionMappers(); 
+            //     
+            // });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "recipeapp_backend", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "recipeapp_backend", Version = "v1"});
             });
         }
 
@@ -55,10 +61,7 @@ namespace recipeapp_backend
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

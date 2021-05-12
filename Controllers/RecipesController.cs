@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -16,26 +17,26 @@ namespace recipeapp_backend.Controllers
     {
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly IMapper _mapper;
+
         public RecipesController(ApplicationDbContext context, IMapper mapper)
         {
             _applicationDbContext = context;
             _mapper = mapper;
         }
-        
+
         [HttpGet]
-        public IEnumerable<RecipesDto> GetRecipes()
+        public IEnumerable<RecipeDto> GetRecipes()
         {
             var recipesFromDb = _applicationDbContext.Recipes
                 .Include(i => i.Ingredients)
                 .Include(o => o.Instructions).ToList();
-            
-            return _mapper.Map<List<RecipesDto>>(recipesFromDb);
+
+            return _mapper.Map<List<RecipeDto>>(recipesFromDb);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<RecipesDto> GetRecipeById(int id)
+        public ActionResult<RecipeDto> GetRecipeById(int id)
         {
-            
             var singleRecipe = _applicationDbContext.Recipes
                 .Include(i => i.Ingredients)
                 .Include(o => o.Instructions).FirstOrDefault(x => x.Id == id);
@@ -45,7 +46,7 @@ namespace recipeapp_backend.Controllers
                 return NotFound();
             }
 
-            return _mapper.Map<RecipesDto>(singleRecipe);
+            return _mapper.Map<RecipeDto>(singleRecipe);
         }
 
 
@@ -80,15 +81,32 @@ namespace recipeapp_backend.Controllers
         //
         //     return Ok();
         // }
-        
 
         [HttpPost]
-        public async Task<ActionResult<RecipesDto>> CreateRecipes(Recipes recipes)
+        public async Task<ActionResult<RecipeDto>> CreateRecipes(RecipeDto recipeDto)
         {
+            var recipes = _mapper.Map<RecipeDto, Recipe>(recipeDto);
             await _applicationDbContext.Recipes.AddAsync(recipes);
             await _applicationDbContext.SaveChangesAsync();
-            
-            return _mapper.Map<RecipesDto>(recipes);
+
+            return Ok();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RecipeDto>> ChangeRecipe(RecipeDto recipes, int id)
+        { 
+           Recipe singleRecipe = _applicationDbContext.Recipes
+                .Include(i => i.Ingredients)
+                .Include(o => o.Instructions).FirstOrDefault(x => x.Id == id);
+
+            if (singleRecipe is null)
+            {
+                return NotFound();
+            }
+            _mapper.Map(recipes, singleRecipe);
+            _applicationDbContext.Entry(singleRecipe).State = EntityState.Modified;
+            await _applicationDbContext.SaveChangesAsync();
+            return Ok(recipes);
         }
     }
 }

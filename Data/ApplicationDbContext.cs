@@ -5,7 +5,7 @@ namespace recipeapp_backend.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<Recipes> Recipes { get; set; }
+        public DbSet<Recipe> Recipes { get; set; }
 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
