@@ -1,4 +1,5 @@
-﻿using AutoMapper.EquivalencyExpression;
+﻿using System.Linq;
+using AutoMapper.EquivalencyExpression;
 using recipeapp_backend.Models;
 using recipeapp_backend.Models.DTO;
 
@@ -17,5 +18,6 @@ namespace recipeapp_backend.Profile
             CreateMap<Instruction, InstructionDto>().ReverseMap()
                 .EqualityComparison((dtoI, iId) => dtoI.Id == iId.Id);;
         }
+
     }
 }

@@ -108,5 +108,25 @@ namespace recipeapp_backend.Controllers
             await _applicationDbContext.SaveChangesAsync();
             return Ok(recipes);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<RecipeDto>> DeleteRecipe(int id)
+        {
+            var singleRecipe = _applicationDbContext.Recipes
+                .Include(i => i.Ingredients)
+                .Include(o => o.Instructions).FirstOrDefault(x => x.Id == id);
+
+            if (singleRecipe is null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map<RecipeDto>(singleRecipe);
+            _applicationDbContext.Entry(singleRecipe).State = EntityState.Deleted;
+            await _applicationDbContext.SaveChangesAsync();
+            return Ok();
+        }
     }
+    
+
 }
